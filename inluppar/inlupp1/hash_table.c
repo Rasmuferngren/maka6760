@@ -6,8 +6,8 @@
 #include "hash_table.h"
 #include "hash_table_iterator.h"
 
-#define Init_Capacity 17
-#define Default_Load_Factor 0.75f
+#define INIT_CAPACITY 17
+#define DEFAULT_LOAD_FACTOR 0.75f
 
 struct entry
 {
@@ -165,7 +165,7 @@ ioopm_hash_table_t *ioopm_hash_table_create_new(size_t initial_capacity, float l
 
 ioopm_hash_table_t *ioopm_hash_table_create(ioopm_hash_function *hash_fn, ioopm_eq_function *key_eq_fn)
 {
-    return ioopm_hash_table_create_new(Init_Capacity, Default_Load_Factor, hash_fn, key_eq_fn);
+    return ioopm_hash_table_create_new(INIT_CAPACITY, DEFAULT_LOAD_FACTOR, hash_fn, key_eq_fn);
 }
 
 // The loop starts at .next because the sentinel nodes are built into the struct

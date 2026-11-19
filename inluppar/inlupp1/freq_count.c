@@ -142,17 +142,8 @@ int main(int argc, char *argv[])
     for (int i = 0; i < size; ++i)
     {
         printf("%s: %d\n", freq_words[i].word, freq_words[i].freq);
+        free(freq_words[i].word);
     }
 
-    // We have to iterate and free the keys before destroying the table, because
-    // the table does not own the keys.
-    ioopm_hash_table_iterator_t *it_clean = ioopm_hash_table_iterator_create(ht);
-    while (!ioopm_hash_table_iterator_at_end(it_clean))
-    {
-        char *word = ioopm_hash_table_iterator_current_key(it_clean).s;
-        free(word);
-        ioopm_hash_table_iterator_advance(it_clean);
-    }
-    ioopm_hash_table_iterator_destroy(it_clean);
     ioopm_hash_table_destroy(ht);
 }

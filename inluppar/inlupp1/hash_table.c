@@ -251,14 +251,7 @@ bool ioopm_hash_table_has_key(ioopm_hash_table_t *ht, const elem_t key)
 
 bool ioopm_hash_table_is_empty(const ioopm_hash_table_t *ht)
 {
-    if (ht->size == 0)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return ht->size == 0; 
 }
 
 size_t ioopm_hash_table_size(const ioopm_hash_table_t *ht)

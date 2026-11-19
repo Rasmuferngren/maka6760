@@ -25,7 +25,7 @@ static bool string_eq(elem_t a, elem_t b)
 /// @brief Process a single word, updating its frequency
 /// @param word the word to process
 /// @param ht a hash table containing the frequencies of the words found so far
-void process_word(char *word, ioopm_hash_table_t *ht)
+static void process_word(char *word, ioopm_hash_table_t *ht)
 {
     elem_t freq = int_elem(0);
 
@@ -46,7 +46,7 @@ void process_word(char *word, ioopm_hash_table_t *ht)
 /// @brief Process a single file, updating the frequencies of its words
 /// @param filename the name of the file to process
 /// @param ht a hash table containing the frequencies of the words found so far
-void process_file(char *filename, ioopm_hash_table_t *ht)
+static void process_file(char *filename, ioopm_hash_table_t *ht)
 {
     FILE *f = fopen(filename, "r");
     if (f == NULL)
@@ -101,7 +101,7 @@ static int cmp_freq_words_reverse(const void *p1, const void *p2)
 /// @brief Sort an array of @freq_word@s in descending frequency order
 /// @param words the array to be sorted
 /// @param no_words the number of elements in the array
-void sort_freq_words(struct freq_word words[], size_t no_words)
+static void sort_freq_words(struct freq_word words[], size_t no_words)
 {
     qsort(words, no_words, sizeof(struct freq_word), cmp_freq_words_reverse);
 }

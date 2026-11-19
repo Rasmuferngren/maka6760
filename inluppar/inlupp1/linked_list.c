@@ -245,14 +245,8 @@ size_t ioopm_list_size(const ioopm_list_t *list)
 
 bool ioopm_list_is_empty(const ioopm_list_t *list)
 {
-    if (list->first == NULL)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return list->first == NULL; 
+    
 }
 
 ioopm_list_iterator_t *ioopm_list_iterator_create(ioopm_list_t *l)
@@ -271,14 +265,8 @@ void ioopm_list_iterator_destroy(ioopm_list_iterator_t *iter)
 
 bool ioopm_list_iterator_at_end(const ioopm_list_iterator_t *iter)
 {
-    if (iter->current == NULL)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return iter->current == NULL; 
+    
 }
 
 void ioopm_list_iterator_advance(ioopm_list_iterator_t *iter)

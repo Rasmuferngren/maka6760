@@ -1000,6 +1000,65 @@ void test_elem_multiple_lists_different_types(void)
 }
 
 
+// NEW TESTS
+void test_get_and_remove_on_empty_list(void)
+{
+    ioopm_list_t *list = ioopm_list_create();
+    elem_t result = int_elem(-1);
+    CU_ASSERT_FALSE(ioopm_list_get(list, 0, &result));
+    CU_ASSERT_FALSE(ioopm_list_remove(list, 0, &result));
+    CU_ASSERT_EQUAL(result.i, -1);
+    ioopm_list_destroy(list);
+}
+
+void test_get_and_remove_at_index_equal_to_size(void)
+{
+    ioopm_list_t *list = ioopm_list_create();
+    ioopm_list_append(list, int_elem(1));
+    ioopm_list_append(list, int_elem(2));
+    elem_t result = int_elem(-1);
+    CU_ASSERT_FALSE(ioopm_list_get(list, 2, &result));
+    CU_ASSERT_FALSE(ioopm_list_remove(list, 2, &result));
+    CU_ASSERT_EQUAL(ioopm_list_size(list), 2);
+    ioopm_list_destroy(list);
+}
+
+void test_insert_into_empty_list(void)
+{
+    ioopm_list_t *list = ioopm_list_create();
+    CU_ASSERT_TRUE(ioopm_list_insert(list, 0, int_elem(7)));
+    CU_ASSERT_EQUAL(ioopm_list_size(list), 1);
+    CU_ASSERT_EQUAL(ioopm_list_head(list).i, 7);
+    CU_ASSERT_EQUAL(ioopm_list_last(list).i, 7);
+    ioopm_list_destroy(list);
+}
+
+void test_remove_only_element_then_append(void)
+{
+    ioopm_list_t *list = ioopm_list_create();
+    ioopm_list_append(list, int_elem(1));
+    remove_at(list, 0);
+    ioopm_list_append(list, int_elem(2));   // must not touch the freed link
+    CU_ASSERT_EQUAL(ioopm_list_size(list), 1);
+    CU_ASSERT_EQUAL(ioopm_list_head(list).i, 2);
+    CU_ASSERT_EQUAL(ioopm_list_last(list).i, 2);
+    ioopm_list_destroy(list);
+}
+
+void test_iterator_remove_only_element(void)
+{
+    ioopm_list_t *list = ioopm_list_create();
+    ioopm_list_append(list, int_elem(1));
+    ioopm_list_iterator_t *iter = ioopm_list_iterator_create(list);
+    CU_ASSERT_EQUAL(ioopm_list_iterator_remove(iter).i, 1);
+    CU_ASSERT_TRUE(ioopm_list_is_empty(list));
+    CU_ASSERT_TRUE(ioopm_list_iterator_at_end(iter));
+    ioopm_list_append(list, int_elem(2));   // list must still work
+    CU_ASSERT_EQUAL(ioopm_list_last(list).i, 2);
+    ioopm_list_iterator_destroy(iter);
+    ioopm_list_destroy(list);
+}
+
 // ============================================================================
 // MAIN FUNCTION
 // ============================================================================
@@ -1112,7 +1171,14 @@ int main(void)
         (CU_add_test(suite, "Elem insert invalid index does nothing", test_elem_insert_invalid_index_does_nothing) == NULL) ||
         (CU_add_test(suite, "Elem iterator over strings", test_elem_iterator_over_strings) == NULL) ||
         (CU_add_test(suite, "Elem iterator insert and remove pointers", test_elem_iterator_insert_and_remove_pointers) == NULL) ||
-        (CU_add_test(suite, "Elem multiple lists different types", test_elem_multiple_lists_different_types) == NULL)
+        (CU_add_test(suite, "Elem multiple lists different types", test_elem_multiple_lists_different_types) == NULL) || 
+        
+        // 13. New tests (edge cases)
+        (CU_add_test(suite, "Get and remove on empty list fail", test_get_and_remove_on_empty_list) == NULL) ||
+        (CU_add_test(suite, "Get and remove at index == size fail", test_get_and_remove_at_index_equal_to_size) == NULL) ||
+        (CU_add_test(suite, "Insert into empty list sets head and last", test_insert_into_empty_list) == NULL) ||
+        (CU_add_test(suite, "Remove only element then append", test_remove_only_element_then_append) == NULL) ||
+        (CU_add_test(suite, "Iterator remove only element", test_iterator_remove_only_element) == NULL)
     )
     {
         CU_cleanup_registry();

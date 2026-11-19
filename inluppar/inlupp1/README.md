@@ -37,6 +37,33 @@ You can now run one of the following *tests*;
 
 Use make clean to remove .o-files.
 
+## Running freq_count
+
+After compiling with: 
+
+``` bash
+make
+# or
+make all
+# or
+make frec_count
+```
+
+You can run the output file with: 
+
+``` bash
+./freq_count <file>
+```
+
+Where <file> is any *.txt file.
+
+For example: 
+``` bash
+./freq_count 10k-words.txt
+# or
+./freq_count 16k-words.txt
+```
+
 ## Ownership
 Neither the hash table nor the list takes ownership of keys or values. They are never copied or freed by the data structures; the caller is responsible for that.
 

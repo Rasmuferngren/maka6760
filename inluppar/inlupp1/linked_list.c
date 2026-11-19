@@ -28,6 +28,12 @@ struct list_iterator
     link_t *current;
 };
 
+/// @brief Get the link at a given position in the list
+/// @param list the list to walk through
+/// @param steps how many links to move forward from the first link (0 gives the first link)
+/// @return the link at position steps
+/// @note steps must be less than the list's size; otherwise the function
+///       dereferences NULL and the program crashes
 static link_t *traverse_to_link(const ioopm_list_t *list, size_t steps)
 {
     link_t *link = list->first;
@@ -38,6 +44,9 @@ static link_t *traverse_to_link(const ioopm_list_t *list, size_t steps)
     return link;
 }
 
+/// @brief Allocate a new link holding a value
+/// @param value the value to store in the link
+/// @return a new link with next set to NULL, which the caller must free
 static link_t *create_new_link(elem_t value)
 {
     link_t *new_link = calloc(1, sizeof(link_t));
@@ -45,6 +54,11 @@ static link_t *create_new_link(elem_t value)
     return new_link;
 }
 
+/// @brief Make new_link the only link in the list (both first and last)
+/// @param list a list that must be empty when this is called
+/// @param new_link the link to insert
+/// @note does not update the list's size and does not free any links
+///       already in the list, so calling it on a non-empty list leaks them
 static void only_one_link(ioopm_list_t *list, link_t *new_link)
 {
     list->first = new_link;
@@ -53,14 +67,8 @@ static void only_one_link(ioopm_list_t *list, link_t *new_link)
 
 static bool valid_index(const ioopm_list_t *list, size_t index)
 {
-    if (index < ioopm_list_size(list))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return index < ioopm_list_size(list); 
+    
 }
 
 ioopm_list_t *ioopm_list_create(void)

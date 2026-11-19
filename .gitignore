@@ -16,6 +16,6 @@ inluppar/inlupp1/freq_count
 inluppar/inlupp1/linked_list_tests
 inluppar/inlupp1/ord
 inluppar/inlupp1/*.o
-
+inluppar/inlupp1/*.out
 # Course material (not our code)
 v58/

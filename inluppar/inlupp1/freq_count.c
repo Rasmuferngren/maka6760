@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
   struct freq_word freq_words[size];
 
   ioopm_hash_table_iterator_t *it = ioopm_hash_table_iterator_create(ht);
-    int count = 0;
+  int count = 0;
   while(!ioopm_hash_table_iterator_at_end(it))
   {
     char *word = ioopm_hash_table_iterator_current_key(it).s;

@@ -1010,6 +1010,126 @@ void test_key_iterator_int_keys()
   ioopm_hash_table_destroy(ht);
 }
 
+
+// ============================================================================
+// 13. NEW TESTS (edge cases added during code review)
+// ============================================================================
+
+void test_is_empty_new_table()
+{
+  ioopm_hash_table_t *ht = ioopm_hash_table_create(string_hash, string_eq);
+  CU_ASSERT_TRUE(ioopm_hash_table_is_empty(ht));
+  ioopm_hash_table_destroy(ht);
+}
+
+void test_remove_last_key_then_reinsert()
+{
+  ioopm_hash_table_t *ht = ioopm_hash_table_create(string_hash, string_eq);
+  elem_t result = int_elem(0);
+
+  ioopm_hash_table_insert(ht, string_elem("k"), int_elem(1));
+  CU_ASSERT_TRUE(remove_key(ht, "k"));
+  CU_ASSERT_TRUE(ioopm_hash_table_is_empty(ht));
+
+  // the table must still work after becoming empty again
+  ioopm_hash_table_insert(ht, string_elem("k"), int_elem(2));
+  CU_ASSERT_EQUAL(ioopm_hash_table_size(ht), 1);
+  CU_ASSERT_TRUE(ioopm_hash_table_lookup(ht, string_elem("k"), &result));
+  CU_ASSERT_EQUAL(result.i, 2);
+
+  ioopm_hash_table_destroy(ht);
+}
+
+void test_remove_missing_key_from_nonempty_bucket()
+{
+  // constant_hash puts every key in the same bucket, so remove must walk
+  // the whole chain and stop at the end without finding the key
+  ioopm_hash_table_t *ht = ioopm_hash_table_create(constant_hash, string_eq);
+  ioopm_hash_table_insert(ht, string_elem("a"), int_elem(1));
+  ioopm_hash_table_insert(ht, string_elem("b"), int_elem(2));
+
+  CU_ASSERT_FALSE(remove_key(ht, "z"));
+  CU_ASSERT_FALSE(ioopm_hash_table_has_key(ht, string_elem("z")));
+  CU_ASSERT_EQUAL(ioopm_hash_table_size(ht), 2);
+  CU_ASSERT_TRUE(ioopm_hash_table_has_key(ht, string_elem("a")));
+  CU_ASSERT_TRUE(ioopm_hash_table_has_key(ht, string_elem("b")));
+
+  ioopm_hash_table_destroy(ht);
+}
+
+void test_iterator_first_and_last_bucket()
+{
+  // With int_hash and 17 buckets, key 0 lands in the first bucket
+  // and key 16 in the last one
+  ioopm_hash_table_t *ht = ioopm_hash_table_create(int_hash, int_eq);
+  ioopm_hash_table_insert(ht, int_elem(0), int_elem(100));
+  ioopm_hash_table_insert(ht, int_elem(16), int_elem(116));
+
+  bool seen_first = false;
+  bool seen_last = false;
+  int count = 0;
+
+  ioopm_hash_table_iterator_t *it = ioopm_hash_table_iterator_create(ht);
+  while (!ioopm_hash_table_iterator_at_end(it))
+  {
+    int key = ioopm_hash_table_iterator_current_key(it).i;
+    if (key == 0) seen_first = true;
+    if (key == 16) seen_last = true;
+    count++;
+    ioopm_hash_table_iterator_advance(it);
+  }
+
+  CU_ASSERT_TRUE(seen_first);
+  CU_ASSERT_TRUE(seen_last);
+  CU_ASSERT_EQUAL(count, 2);
+
+  ioopm_hash_table_iterator_destroy(it);
+  ioopm_hash_table_destroy(ht);
+}
+
+void test_empty_string_key()
+{
+  ioopm_hash_table_t *ht = ioopm_hash_table_create(string_hash, string_eq);
+  elem_t result = int_elem(0);
+
+  ioopm_hash_table_insert(ht, string_elem(""), int_elem(5));
+  CU_ASSERT_TRUE(ioopm_hash_table_has_key(ht, string_elem("")));
+  CU_ASSERT_TRUE(ioopm_hash_table_lookup(ht, string_elem(""), &result));
+  CU_ASSERT_EQUAL(result.i, 5);
+  CU_ASSERT_TRUE(remove_key(ht, ""));
+  CU_ASSERT_TRUE(ioopm_hash_table_is_empty(ht));
+
+  ioopm_hash_table_destroy(ht);
+}
+
+void test_many_entries_insert_lookup_remove()
+{
+  ioopm_hash_table_t *ht = ioopm_hash_table_create(string_hash, string_eq);
+  char buf[100][16];
+  elem_t result = int_elem(0);
+
+  for (int i = 0; i < 100; ++i)
+  {
+    snprintf(buf[i], sizeof(buf[i]), "key%d", i);
+    ioopm_hash_table_insert(ht, string_elem(buf[i]), int_elem(i));
+  }
+  CU_ASSERT_EQUAL(ioopm_hash_table_size(ht), 100);
+
+  for (int i = 0; i < 100; ++i)
+  {
+    CU_ASSERT_TRUE(ioopm_hash_table_lookup(ht, string_elem(buf[i]), &result));
+    CU_ASSERT_EQUAL(result.i, i);
+  }
+
+  for (int i = 0; i < 100; ++i)
+  {
+    CU_ASSERT_TRUE(remove_key(ht, buf[i]));
+  }
+  CU_ASSERT_TRUE(ioopm_hash_table_is_empty(ht));
+
+  ioopm_hash_table_destroy(ht);
+}
+
 int main()
 {
 	// First we try to set up CUnit, and exit if we fail
@@ -1081,6 +1201,17 @@ int main()
 		CU_add_test(my_test_suite, "key: all in one bucket uses eq_fn", test_key_all_in_one_bucket_uses_eq_fn) == NULL ||
 		CU_add_test(my_test_suite, "key: two tables with different key types", test_key_two_tables_different_key_types) == NULL ||
 		CU_add_test(my_test_suite, "key: iterator over int keys", test_key_iterator_int_keys) == NULL ||
+
+    		CU_add_test(my_test_suite, "key: two tables with different key types", test_key_two_tables_different_key_types) == NULL ||
+		CU_add_test(my_test_suite, "key: iterator over int keys", test_key_iterator_int_keys) == NULL ||
+
+		// 13. New tests (edge cases)
+		CU_add_test(my_test_suite, "is_empty on new table", test_is_empty_new_table) == NULL ||
+		CU_add_test(my_test_suite, "remove last key then reinsert", test_remove_last_key_then_reinsert) == NULL ||
+		CU_add_test(my_test_suite, "remove missing key from non-empty bucket", test_remove_missing_key_from_nonempty_bucket) == NULL ||
+		CU_add_test(my_test_suite, "iterator over first and last bucket", test_iterator_first_and_last_bucket) == NULL ||
+		CU_add_test(my_test_suite, "empty string as key", test_empty_string_key) == NULL ||
+		CU_add_test(my_test_suite, "many entries insert, lookup, remove", test_many_entries_insert_lookup_remove) == NULL ||
 		0)
 	{
 		// If adding any of the tests fails, we tear down CUnit and exit

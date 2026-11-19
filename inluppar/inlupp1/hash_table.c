@@ -151,21 +151,16 @@ static void grow_if_needed(ioopm_hash_table_t *ht)
     }
 }
 
-ioopm_hash_table_t *ioopm_hash_table_create_new(size_t initial_capacity, float load_factor, ioopm_hash_function *hash_fn, ioopm_eq_function *key_eq_fn)
+ioopm_hash_table_t *ioopm_hash_table_create(ioopm_hash_function *hash_fn, ioopm_eq_function *key_eq_fn)
 {
     ioopm_hash_table_t *ht = malloc(sizeof(ioopm_hash_table_t));
     ht->hash_fn = hash_fn;
     ht->key_eq_fn = key_eq_fn;
-    ht->load_factor = load_factor;
-    ht->capacity = initial_capacity;
-    ht->buckets = calloc(initial_capacity, sizeof(entry_t *)); // all buckets NULL
+    ht->load_factor = DEFAULT_LOAD_FACTOR;
+    ht->capacity = INIT_CAPACITY;
+    ht->buckets = calloc(INIT_CAPACITY, sizeof(entry_t *)); // all buckets NULL
     ht->size = 0;
     return ht;
-}
-
-ioopm_hash_table_t *ioopm_hash_table_create(ioopm_hash_function *hash_fn, ioopm_eq_function *key_eq_fn)
-{
-    return ioopm_hash_table_create_new(INIT_CAPACITY, DEFAULT_LOAD_FACTOR, hash_fn, key_eq_fn);
 }
 
 // The loop starts at .next because the sentinel nodes are built into the struct

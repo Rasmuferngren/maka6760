@@ -275,14 +275,7 @@ void ioopm_hash_table_iterator_destroy(ioopm_hash_table_iterator_t *it)
 
 bool ioopm_hash_table_iterator_at_end(const ioopm_hash_table_iterator_t *it)
 {
-    if (it->current_entry == NULL)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return it->current_entry == NULL; 
 }
 
 
